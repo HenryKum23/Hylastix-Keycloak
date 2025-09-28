@@ -1,0 +1,14 @@
+- hosts: all
+  become: yes
+  tasks:
+    - name: Stop all containers
+      command: docker stop $(docker ps -q)
+      ignore_errors: yes
+
+    - name: Remove all containers
+      command: docker rm $(docker ps -a -q)
+      ignore_errors: yes
+
+    - name: Remove dangling volumes
+      command: docker volume prune -f
+      ignore_errors: yes

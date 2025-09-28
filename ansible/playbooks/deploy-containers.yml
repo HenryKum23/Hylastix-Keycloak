@@ -1,0 +1,48 @@
+- hosts: web
+  become: yes
+  remote_user: adminvm
+  tasks:
+    - name: Ensure remote home directory exists
+      file:
+        path: "/home/adminvm"
+        state: directory
+        mode: '0755'
+
+    - name: Ensure docker conf.d directory exists
+      file:
+        path: "/home/adminvm/docker/conf.d"
+        state: directory
+        mode: '0755'
+
+    - name: Copy docker-compose file to remote home directory
+      copy:
+        src: ../../docker/docker-compose.yml
+        dest: "/home/adminvm/docker-compose.yml"
+        mode: '0644'
+
+    - name: Copy default.conf to docker conf.d directory
+      copy:
+        src: ../../docker/conf.d/default.conf
+        dest: "/home/adminvm/docker/conf.d/default.conf"
+        mode: '0644'
+
+    - name: Copy html directory to remote home directory
+      copy:
+        src: ../../docker/html/
+        dest: "/home/adminvm/html/"
+        mode: '0755'
+
+    - name: Stop and remove all containers and volumes
+      shell: docker-compose -f /home/adminvm/docker-compose.yml down -v || true
+      args:
+        chdir: "/home/adminvm"
+      ignore_errors: true
+
+    - name: Start containers
+      shell: docker-compose -f /home/adminvm/docker-compose.yml up -d
+      args:
+        chdir: "/home/adminvm"
+      register: docker_compose_up
+
+    - debug:
+        var: docker_compose_up.stdout
