@@ -1,0 +1,59 @@
+name: Manage Infrastructure
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: "Choose whether to deploy or teardown"
+        required: true
+        default: "deploy"
+        type: choice
+        options:
+          - deploy
+          - teardown
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Upgrade/Install Ansible
+        run: |
+          sudo apt update
+          sudo apt install -y software-properties-common
+          sudo add-apt-repository --yes --update ppa:ansible/ansible
+          sudo apt install -y ansible
+          ansible --version
+
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+
+      - name: Create dynamic Ansible inventory
+        run: |
+          # VM public IP from GitHub secret
+          VM_IP="${{ secrets.VM_IP }}"
+          cat <<EOF > ansible/inventory.ini
+          [web]
+          $VM_IP ansible_user=adminvm ansible_ssh_private_key_file=/home/runner/.ssh/id_rsa
+          EOF
+
+      - name: Test Ansible connectivity
+        run: ansible -i ansible/inventory.ini web -m ping
+        env:
+          ANSIBLE_HOST_KEY_CHECKING: "False"
+
+      - name: Run Ansible Playbooks
+        run: |
+          if [ "${{ github.event.inputs.action }}" = "deploy" ]; then
+            ansible-playbook -i ansible/inventory.ini ansible/playbooks/install-docker.yml --private-key ~/.ssh/id_rsa -u ${{ secrets.SSH_USERNAME }}
+            ansible-playbook -i ansible/inventory.ini ansible/playbooks/deploy-containers.yml --private-key ~/.ssh/id_rsa -u ${{ secrets.SSH_USERNAME }}
+            ansible-playbook -i ansible/inventory.ini ansible/playbooks/config-keycloak.yml --private-key ~/.ssh/id_rsa -u ${{ secrets.SSH_USERNAME }}
+          else
+            ansible-playbook -i ansible/inventory.ini ansible/playbooks/teardown.yml --private-key ~/.ssh/id_rsa -u ${{ secrets.SSH_USERNAME }}
+          fi

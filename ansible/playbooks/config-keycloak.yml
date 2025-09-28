@@ -1,0 +1,151 @@
+---
+- name: Configure Keycloak
+  hosts: web
+  become: true
+  vars:
+    keycloak_admin_user: admin
+    keycloak_admin_password: admin
+    keycloak_realm: HYLASTIX-Realm
+    keycloak_client_id: nginx-app
+    keycloak_client_secret: myclientsecret
+    keycloak_test_user: testuser
+    keycloak_test_password: testpassword
+    keycloak_url: "http://keycloak:8080"
+  tasks:
+    - name: Wait for Keycloak to be ready
+      shell: |
+        i=0
+        while [ $i -lt 30 ]; do
+          if curl -s http://localhost:8080/realms/master | grep -q '"realm":"master"'; then
+            echo "Keycloak is ready!"
+            exit 0
+          fi
+          echo "Waiting for Keycloak..."
+          sleep 5
+          i=$((i+1))
+        done
+        echo "Keycloak did not become ready in time."
+        exit 1
+      register: keycloak_ready
+      failed_when: keycloak_ready.rc != 0
+
+    - name: Authenticate to Keycloak as admin
+      shell: >
+        docker exec keycloak /opt/keycloak/bin/kcadm.sh config credentials
+        --server {{ keycloak_url }}
+        --realm master
+        --user {{ keycloak_admin_user }}
+        --password {{ keycloak_admin_password }}
+      register: login_output
+      changed_when: false
+      failed_when: login_output.rc != 0
+
+    # ADD THE SSL FIX HERE - Right after authentication
+    - name: Disable SSL requirement for master realm (for admin console access)
+      shell: >
+        docker exec keycloak /opt/keycloak/bin/kcadm.sh update realms/master
+        -s sslRequired=NONE
+      register: master_ssl_update
+      changed_when: true
+      
+    - name: Display master realm SSL update
+      debug:
+        msg: "Master realm SSL requirement disabled for HTTP admin access"
+
+    # Continue with your existing tasks
+    - name: Create realm with SSL disabled
+      shell: |
+        docker exec keycloak /opt/keycloak/bin/kcadm.sh get realms/{{ keycloak_realm }} || \
+        docker exec keycloak /opt/keycloak/bin/kcadm.sh create realms \
+          -s realm={{ keycloak_realm }} \
+          -s enabled=true \
+          -s sslRequired=NONE \
+          -s registrationAllowed=true \
+          -s loginWithEmailAllowed=true \
+          -s duplicateEmailsAllowed=false \
+          -s resetPasswordAllowed=true \
+          -s editUsernameAllowed=false \
+          -s bruteForceProtected=true
+      register: realm_create
+      changed_when: "'Created' in realm_create.stdout"
+
+    - name: Disable SSL requirement for existing realm
+      shell: >
+        docker exec keycloak /opt/keycloak/bin/kcadm.sh update realms/{{ keycloak_realm }}
+        -s sslRequired=NONE
+      ignore_errors: true
+
+    - name: Create client with HTTP redirect URIs
+      shell: |
+        CLIENT_EXISTS=$(docker exec keycloak /opt/keycloak/bin/kcadm.sh get clients -r {{ keycloak_realm }} -q clientId={{ keycloak_client_id }} --format csv --noquotes)
+        if [ -z "$CLIENT_EXISTS" ]; then
+          docker exec keycloak /opt/keycloak/bin/kcadm.sh create clients -r {{ keycloak_realm }} \
+            -s clientId={{ keycloak_client_id }} \
+            -s enabled=true \
+            -s publicClient=false \
+            -s secret={{ keycloak_client_secret }} \
+            -s 'redirectUris=["http://{{ inventory_hostname }}/*","http://{{ inventory_hostname }}:80/*","http://localhost/*"]' \
+            -s 'webOrigins=["http://{{ inventory_hostname }}","http://{{ inventory_hostname }}:80","http://localhost"]' \
+            -s protocol=openid-connect \
+            -s standardFlowEnabled=true \
+            -s directAccessGrantsEnabled=true \
+            -s serviceAccountsEnabled=false \
+            -s authorizationServicesEnabled=false
+          echo "Client created"
+        else
+          echo "Client already exists"
+        fi
+      register: client_create
+      changed_when: "'Client created' in client_create.stdout"
+
+    - name: Update client for HTTP access
+      shell: |
+        CLIENT_ID=$(docker exec keycloak /opt/keycloak/bin/kcadm.sh get clients -r {{ keycloak_realm }} -q clientId={{ keycloak_client_id }} --fields id --format csv --noquotes)
+        if [ ! -z "$CLIENT_ID" ]; then
+          docker exec keycloak /opt/keycloak/bin/kcadm.sh update clients/$CLIENT_ID -r {{ keycloak_realm }} \
+            -s 'redirectUris=["http://{{ inventory_hostname }}/*","http://{{ inventory_hostname }}:80/*","http://localhost/*"]' \
+            -s 'webOrigins=["http://{{ inventory_hostname }}","http://{{ inventory_hostname }}:80","http://localhost"]'
+        fi
+      ignore_errors: true
+
+    - name: Create user only if not exists
+      shell: |
+        docker exec keycloak /opt/keycloak/bin/kcadm.sh get users -r {{ keycloak_realm }} -q username={{ keycloak_test_user }} | grep -q username || \
+        docker exec keycloak /opt/keycloak/bin/kcadm.sh create users -r {{ keycloak_realm }} \
+          -s username={{ keycloak_test_user }} \
+          -s enabled=true \
+          -s firstName=Test \
+          -s lastName=User \
+          -s email={{ keycloak_test_user }}@example.com
+      register: user_create
+      changed_when: "'Created' in user_create.stdout"
+
+    - name: Set test user password
+      shell: >
+        docker exec keycloak /opt/keycloak/bin/kcadm.sh set-password
+        -r {{ keycloak_realm }}
+        --username {{ keycloak_test_user }}
+        --new-password {{ keycloak_test_password }}
+      ignore_errors: true
+
+    - name: Verify realm SSL settings
+      shell: >
+        docker exec keycloak /opt/keycloak/bin/kcadm.sh get realms/{{ keycloak_realm }}
+        --fields sslRequired
+      register: ssl_check
+      
+    - name: Display SSL configuration
+      debug:
+        msg: "Realm SSL requirement: {{ ssl_check.stdout }}"
+
+    - name: Display configuration summary
+      debug:
+        msg: |
+          Keycloak configuration completed:
+          - Master realm SSL: DISABLED (for admin console access)
+          - Realm: {{ keycloak_realm }}
+          - SSL Required: NONE (HTTP enabled)
+          - Client ID: {{ keycloak_client_id }}
+          - Test User: {{ keycloak_test_user }}
+          - Keycloak URL: http://{{ inventory_hostname }}:8080
+          - Admin Console: http://{{ inventory_hostname }}:8080/admin

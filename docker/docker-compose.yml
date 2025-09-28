@@ -1,0 +1,72 @@
+version: '3.9'
+services:
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    environment:
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: keycloakpass
+      POSTGRES_DB: keycloak
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - keycloak-net
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    container_name: keycloak
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: keycloakpass
+
+      KC_HTTP_ENABLED: "true"
+      KC_HOSTNAME_STRICT: "false"
+      KC_HOSTNAME_STRICT_HTTPS: "false"
+      KC_HOSTNAME_STRICT_BACKCHANNEL: "false"
+      KC_HOSTNAME: 134.149.27.43
+      KC_HOSTNAME_PORT: 8080
+
+      KC_PROXY: "edge"
+      KEYCLOAK_SSL_REQUIRED: none
+
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    command: >
+      start-dev
+      --http-port=8080
+      --http-host=0.0.0.0
+      -Dkeycloak.profile.feature.admin_fine_grained_authz=false
+      -Dkeycloak.frontend-url=http://134.149.27.43:8080
+    networks:
+      - keycloak-net
+    healthcheck:
+      test: ["CMD", "bash", "-c", "exec </dev/tcp/localhost/8080"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  web:
+    image: nginx:latest
+    container_name: web
+    volumes:
+      - ./docker/conf.d:/etc/nginx/conf.d
+      - ./html:/usr/share/nginx/html
+    ports:
+      - "80:80"
+    depends_on:
+      - keycloak
+    networks:
+      - keycloak-net
+
+networks:
+  keycloak-net:
+
+volumes:
+  postgres_data:
