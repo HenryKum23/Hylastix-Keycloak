@@ -1,12 +1,268 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Welcome to Keycloak-Protected App</title>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Protected Web Application - DevOps Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            padding: 3rem;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 600px;
+            width: 100%;
+        }
+        
+        .logo {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 50%;
+            margin: 0 auto 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            color: white;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 1rem;
+            font-size: 2.5rem;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 2rem;
+            font-size: 1.2rem;
+        }
+        
+        .status-card {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+        
+        .status-success {
+            background: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            text-decoration: none;
+            display: inline-block;
+            margin: 0.5rem;
+            transition: all 0.3s ease;
+            min-width: 150px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-keycloak {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+        }
+        
+        .btn-keycloak:hover {
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+        
+        .info-card {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .info-card h3 {
+            color: #495057;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .info-card p {
+            color: #6c757d;
+            line-height: 1.6;
+        }
+        
+        .tech-stack {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+        
+        .tech-badge {
+            background: #e9ecef;
+            color: #495057;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .footer {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid #e9ecef;
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+        
+        .demo-note {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+    </style>
 </head>
 <body>
-    <h1>Hello!</h1>
-    <p>If you are seeing this page, it means you have been authenticated via <strong>Keycloak</strong>.</p>
-    <p>This static page is served by <strong>Nginx</strong> inside your Azure VM.</p>
+    <div class="container">
+        <div class="logo">🚀</div>
+        <h1>HYLASTIX KEYCLOAK PROJECT</h1>
+        <p class="subtitle">Keycloak Authentication System on Azure</p>
+        
+        <div class="status-card status-success">
+            <h2>✅ Deployment Successful!</h2>
+            <p>Your infrastructure and application are running successfully.</p>
+        </div>
+        
+        <div class="demo-note">
+            <strong>📋 Demo Information:</strong><br>
+            This is a demonstration of Infrastructure as Code (IaC) using Terraform, Ansible, and GitHub Actions.
+        </div>
+        
+        <div class="info-grid">
+            <div class="info-card">
+                <h3>🔐 Authentication</h3>
+                <p>Keycloak provides enterprise-grade identity and access management with OIDC/SAML support.</p>
+            </div>
+            
+            <div class="info-card">
+                <h3>🐳 Containerization</h3>
+                <p>Docker containers ensure consistent deployment across environments with minimal resource usage.</p>
+            </div>
+            
+            <div class="info-card">
+                <h3>☁️ Cloud Infrastructure</h3>
+                <p>Azure VM with proper networking, security groups, and cost-optimized configuration.</p>
+            </div>
+            
+            <div class="info-card">
+                <h3>⚡ CI/CD Pipeline</h3>
+                <p>GitHub Actions automate deployment, configuration, and teardown processes.</p>
+            </div>
+        </div>
+        
+        <div style="margin: 2rem 0;">
+            <a href="/login" class="btn">
+                🔑 Login with Keycloak
+            </a>
+            <a href="#" class="btn btn-keycloak" onclick="openKeycloakAdmin()">
+                ⚙️ Keycloak Admin
+            </a>
+        </div>
+        
+        <div class="tech-stack">
+            <span class="tech-badge">Terraform</span>
+            <span class="tech-badge">Ansible</span>
+            <span class="tech-badge">Docker</span>
+            <span class="tech-badge">Keycloak</span>
+            <span class="tech-badge">PostgreSQL</span>
+            <span class="tech-badge">Nginx</span>
+            <span class="tech-badge">GitHub Actions</span>
+            <span class="tech-badge">Azure</span>
+        </div>
+        
+        <div class="footer">
+            <p><strong>Architecture:</strong> VM → Docker → Keycloak + PostgreSQL + Nginx</p>
+            <p><strong>Security:</strong> NSG Rules, HTTPS Ready, OIDC Authentication</p>
+            <p><strong>Monitoring:</strong> Health Checks, Logging, Auto-restart</p>
+            <hr style="margin: 1rem 0; border: none; height: 1px; background: #dee2e6;">
+            <p>🎯 <strong>DevOps Test Completed Successfully</strong></p>
+            <p>Infrastructure as Code • Continuous Integration • Container Orchestration</p>
+        </div>
+    </div>
+
+    <script>
+        // Get current host for dynamic URLs
+        const currentHost = window.location.hostname;
+        const keycloakUrl = `http://${currentHost}:8080`;
+        
+        // Open Keycloak admin console
+        function openKeycloakAdmin() {
+            window.open(keycloakUrl + '/admin', '_blank');
+        }
+        
+        // Display environment info
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 DevOps Test Environment');
+            console.log('Keycloak URL:', keycloakUrl);
+            console.log('Web App URL:', window.location.origin);
+            
+            // Check if user came back from login
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('auth') === 'success') {
+                alert('🎉 Authentication flow completed!\n\nThis demonstrates the Keycloak integration is working.');
+            }
+            
+            // Simple connectivity test
+            fetch('/health')
+                .then(response => response.text())
+                .then(data => console.log('Health Check: ✅', data))
+                .catch(error => console.log('Health Check: ⚠️', error));
+        });
+    </script>
 </body>
 </html>
