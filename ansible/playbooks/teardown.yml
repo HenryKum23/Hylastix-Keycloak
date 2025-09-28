@@ -1,14 +1,19 @@
-- hosts: all
+- name: Teardown Docker containers
+  hosts: all
   become: yes
+
   tasks:
-    - name: Stop all containers
-      command: docker stop $(docker ps -q)
+    - name: Stop all running containers
+      shell: |
+        containers=$(docker ps -q)
+        [ -n "$containers" ] && docker stop $containers || true
       ignore_errors: yes
 
     - name: Remove all containers
-      command: docker rm $(docker ps -a -q)
+      shell: |
+        containers=$(docker ps -a -q)
+        [ -n "$containers" ] && docker rm $containers || true
       ignore_errors: yes
 
     - name: Remove dangling volumes
-      command: docker volume prune -f
-      ignore_errors: yes
+      shell: docker volume prune -f

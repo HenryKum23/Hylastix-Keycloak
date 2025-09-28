@@ -40,10 +40,7 @@
 
 Configure these secrets in Repository Settings → Secrets and variables → Actions:
 
-```
-AZURE_CLIENT_ID          # Service Principal Application (Client) ID
-AZURE_CLIENT_SECRET      # Service Principal Authentication Secret
-AZURE_SUBSCRIPTION_ID    # Target Azure Subscription ID  
+```  
 AZURE_TENANT_ID          # Azure Active Directory Tenant ID
 SSH_PRIVATE_KEY          # Private SSH key for VM authentication
 KEYCLOAK_ADMIN_PASSWORD  # Keycloak administrator password
