@@ -6,7 +6,7 @@ This **Hylastix-Keycloak** project includes a comprehensive technical write-up d
 
 For the full walkthrough and in-depth notes on this project, please refer to the documentation file located in the root directory of this repository.
 
-> Kindly open the **`doc`** directory to explore the detailed project documentation and appreciate the walkthrough.
+> Kindly open the **`docs`** directory to explore the detailed project documentation and appreciate the walkthrough.
 
 ---
 

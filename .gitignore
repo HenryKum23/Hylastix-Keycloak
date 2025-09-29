@@ -1,2 +1,6 @@
 # Ignore the terraform directory
-terraform
+.terraform
+.terraform.lock.hcl
+terraform.tfstate
+id_rsa
+id_rsa.pub
