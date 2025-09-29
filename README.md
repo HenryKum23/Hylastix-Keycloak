@@ -1,6 +1,6 @@
 # Hylastix-Keycloak Project
 
-This **Hylastix-Keycloak** project includes a comprehensive technical write-up designed for both technical and non-technical individuals. It explains how the project was built from scratch to completion, including the tools used and the rationale behind their selection and use.
+This **Hylastix-Keycloak** project includes a comprehensive technical write-up designed for both technical and non-technical individuals. It explains how the project was built from scratch to completion, including the tools used and the rationale behind their selection and use in this case.
 
 ## 📄 Project Documentation
 
