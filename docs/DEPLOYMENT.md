@@ -41,7 +41,6 @@
 Configure these secrets in Repository Settings → Secrets and variables → Actions:
 
 ```  
-AZURE_TENANT_ID          # Azure Active Directory Tenant ID
 SSH_PRIVATE_KEY          # Private SSH key for VM authentication
 KEYCLOAK_ADMIN_PASSWORD  # Keycloak administrator password
 KEYCLOAK_DB_PASSWORD     # Keycloak database connection password
