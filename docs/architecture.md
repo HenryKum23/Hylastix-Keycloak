@@ -6,14 +6,6 @@ This project sets up a secure static website hosted on Azure, protected by **Key
 
 ---
 
-## 🖼️ Architecture Diagram
-
-![Architecture Diagram](architecture-diagram.png)
-
-*(Tip: Use [draw.io](https://draw.io), Lucidchart, or Excalidraw to create the diagram and save it as `docs/architecture-diagram.png`)*
-
----
-
 ## 🧱 Infrastructure Components
 
 | Component         | Why It's Used                                                      |
