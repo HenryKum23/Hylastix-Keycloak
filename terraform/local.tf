@@ -1,7 +1,7 @@
 # This is meant for tags
 locals {
   common_tags = {
-    environment = "Stagging"
+    environment = "Staging"
     project     = "keycloak"
     Owner       = "Henry"
   }

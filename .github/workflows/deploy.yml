@@ -6,11 +6,11 @@ on:
       action:
         description: "Choose whether to deploy or teardown"
         required: true
-        default: "deploy"
+        default: "apply"
         type: choice
         options:
-          - deploy
-          - teardown
+          - apply
+          - destroy
 
 jobs:
   deploy:

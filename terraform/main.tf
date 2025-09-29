@@ -4,7 +4,6 @@ resource "azurerm_resource_group" "rg" {
   location = var.location
 
   tags = local.common_tags
-
 }
 
 # VNet + Subnet
@@ -15,7 +14,6 @@ resource "azurerm_virtual_network" "vnet" {
   resource_group_name = azurerm_resource_group.rg.name
 
   tags = local.common_tags
-
 }
 
 resource "azurerm_subnet" "subnet" {
